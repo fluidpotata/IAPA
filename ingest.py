@@ -43,7 +43,8 @@ def chunk_doc(doc):
             'text': f"{doc['title']} - {section_title}\n\n{section_body}",
             'rule_id': doc["rule_id"],
             'title': doc['title'],
-            'category': ', '.join(doc['tags']),
+            'category': doc["category"],
+            'tags': ', '.join(doc['tags']),
             'severity': doc['severity'],
             'section': section_title,
             'filepath': doc['filepath']
@@ -51,7 +52,7 @@ def chunk_doc(doc):
     return chunks
 
 
-def get_vector_store(chroma_dir: "./chroma_db"):
+def get_vector_store(chroma_dir= "./chroma_db"):
     client = chromadb.PersistentClient(path=chroma_dir)
 
     collection = client.get_or_create_collection(
