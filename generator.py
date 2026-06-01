@@ -1,7 +1,11 @@
 import os
-from anthropic import Anthropic
+from google import genai
+from google.genai import types
+from dotenv import load_dotenv
 
 SYSTEM_PROMPT = """"""
+
+load_dotenv()
 
 def format_chunks(docs, metas):
     formatted = []
@@ -50,25 +54,34 @@ def needs_llm(docs, metas, rrf_scores):
 
 
 def call_llm(question, docs, metas):
-    client  = Anthropic()
+    client  = genai.Client()
     context = format_chunks(docs, metas)
 
     user_message = f"""
-Here are the relevant university rules:
+    Here are the relevant university rules:
 
-{context}
+    {context}
 
-Student's question: {question}
-"""
+    Student's question: {question}
+    """
 
-    response = client.messages.create(
-        model      = "claude-3-5-haiku-20241022",
-        max_tokens = 512,
-        system     = SYSTEM_PROMPT,
-        messages   = [{"role": "user", "content": user_message}]
+    # response = client.messages.create(
+    #     model      = "claude-3-5-haiku-20241022",
+    #     max_tokens = 512,
+    #     system     = SYSTEM_PROMPT,
+    #     messages   = [{"role": "user", "content": user_message}]
+    # )
+
+    response = client.models.generate_content(
+        model="gemini-3.5-flash",
+        contents=user_message,
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            max_output_tokens=512,
+        )
     )
 
-    answer    = response.content[0].text
+    answer    = response.text
     rule_ids  = [m["rule_id"]  for m in metas]
     titles    = [m["title"]    for m in metas]
     severities= [m["severity"] for m in metas]
