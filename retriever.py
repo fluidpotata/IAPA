@@ -32,7 +32,7 @@ def semantic_search(question, model, collection, category, top_k=10):
 
     results = collection.query(
         query_embeddings = [question_embedding],
-        n_result = top_k,
+        n_results = top_k,
         where = where,
         include=['documents','metadatas','distances']
     )
@@ -66,7 +66,7 @@ def reciprocal_rank_fusion(semantic_docs, semantic_meta, bm25_docs, bm25_meta, t
         scores[chunk_id] = scores.get(chunk_id, 0) + 1 / (rank+60)
         chunks[chunk_id] = (doc, meta)
 
-    for rank, (doc, meta) in enumerate(zip(bm25_docs, bm25_data)):
+    for rank, (doc, meta) in enumerate(zip(bm25_docs, bm25_meta)):
         chunk_id = meta["rule_id"] + "_"+meta["section"]
         scores[chunk_id] = scores.get(chunk_id, 0)+1 / (rank+60)
         chunks[chunk_id] = (doc, meta)
@@ -75,8 +75,9 @@ def reciprocal_rank_fusion(semantic_docs, semantic_meta, bm25_docs, bm25_meta, t
 
     final_docs = [chunks[i][0] for i in sorted_ids]
     final_metas = [chunks[i][1] for i in sorted_ids]
+    final_scores= [scores[i]    for i in sorted_ids]
 
-    return final_docs, final_metas
+    return final_docs, final_metas, final_scores
 
 
 def detect_category(question):
@@ -89,11 +90,11 @@ def retrieve(question, model, collection, bm25, all_docs, all_metadatas, top_k=1
     sem_docs, sem_meta, _ = semantic_search(question, model, collection, category)
     bm25_docs, bm25_meta, _ = bm25_search(question, bm25, all_docs, all_metadatas)
 
-    final_docs, final_metas = reciprocal_rank_fusion(
+    final_docs, final_metas, final_scores = reciprocal_rank_fusion(
         sem_docs, sem_meta, bm25_docs, bm25_meta, top_k
     )
 
-    return final_docs, final_metas
+    return final_docs, final_metas, final_scores
 
 
 
