@@ -3,4 +3,4 @@ sentence-transformers
 python-frontmatter
 rank-bm25
 anthropic
-
+diskcache
