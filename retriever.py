@@ -1,10 +1,10 @@
 import chromadb
 from sentence_transformers import SentenceTransformer
-from rank_bm25 import BM250kapi
+from rank_bm25 import BM25Okapi
 import numpy as np
 
 
-def load_resources(persist_dir):
+def load_resources(persist_dir="./chroma_db"):
     model = SentenceTransformer("all-MiniLM-L6-v2")
     client = chromadb.PersistentClient(path=persist_dir)
     collection = client.get_collection("uni_info")
@@ -20,7 +20,7 @@ def build_bm25_index(collection):
 
     tokenized = [doc.lower().split() for doc in docs]
 
-    bm25 = BM250kapi(tokenized)
+    bm25 = BM25Okapi(tokenized)
 
     return bm25, docs, metadatas
 
