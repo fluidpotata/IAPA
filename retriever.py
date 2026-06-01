@@ -25,7 +25,7 @@ def build_bm25_index(collection):
     return bm25, docs, metadatas
 
 
-def semantic_search(question, model, collection, category, top_k):
+def semantic_search(question, model, collection, category, top_k=10):
     question_embedding = model.encode(question).tolist()
 
     where = {"category": category} if category else None
@@ -44,7 +44,7 @@ def semantic_search(question, model, collection, category, top_k):
     return docs, metadatas, distances
 
 
-def bm25_search(question, bm25, all_docs, all_metadatas, top_k):
+def bm25_search(question, bm25, all_docs, all_metadatas, top_k=10):
     tokenized_question =  question.lower().split()
     scores = bm25.get_scores(tokenized_question)
 
@@ -57,7 +57,7 @@ def bm25_search(question, bm25, all_docs, all_metadatas, top_k):
     return docs, metadatas, scores
 
 
-def reciprocal_rank_fusion(semantic_docs, semantic_meta, bm25_docs, bm25_meta, top_k):
+def reciprocal_rank_fusion(semantic_docs, semantic_meta, bm25_docs, bm25_meta, top_k=10):
     scores = {}
     chunks = {}
 
@@ -83,7 +83,7 @@ def detect_category(question):
     return None
 
 
-def retrieve(question, model, collection, bm25, all_docs, all_metadatas, top_k):
+def retrieve(question, model, collection, bm25, all_docs, all_metadatas, top_k=10):
     category = detect_category(question)
 
     sem_docs, sem_meta, _ = semantic_search(question, model, collection, category)
