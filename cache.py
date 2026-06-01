@@ -15,7 +15,7 @@ def normalize_question(question):
     return question.lower().strip().rstrip("?!.") # might need more work here
 
 
-def exact_cache_get(question):
+def exact_cache_get(question, cache):
     key =  hashlib.md5(normalize_question(question).encode()).hexdigest()
     result = cache.get(key)
 
