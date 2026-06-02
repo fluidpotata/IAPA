@@ -25,12 +25,12 @@ def exact_cache_get(question, cache):
 
     return None
 
-def exact_cache_set(question, answer, cache, ttl_days):
+def exact_cache_set(question, answer, cache, ttl_days=180):
     key = hashlib.md5(normalize_question(question).encode()).hexdigest()
     cache.set(key, json.dumps(answer), expire=ttl_days*86400)
 
 
-def semantic_cache_get(question, model, cache, threshold):
+def semantic_cache_get(question, model, cache, threshold=0.93):
     entries = cache.get("entries", [])
 
     if not entries:
@@ -41,8 +41,8 @@ def semantic_cache_get(question, model, cache, threshold):
     for entry in entries:
         cache_embedding = np.array(entry["embedding"])
 
-        similarity = np.dot(question_embedding, cached_embedding / 
-                    np.linalg.norm(question_embedding)*np.linalg.norm(cached_embedding))
+        similarity = np.dot(question_embedding, cache_embedding / 
+                    np.linalg.norm(question_embedding)*np.linalg.norm(cache_embedding))
 
         if similarity >= threshold:
             print(f"[Cache] Semantic hit (similarity={similarity:.3f})")
