@@ -3,7 +3,18 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 
-SYSTEM_PROMPT = """"""
+SYSTEM_PROMPT = """
+You are an academic advisor assistant for BRAC University.
+Answer the student's question using ONLY the rule excerpts provided.
+
+Guidelines:
+- Be direct. State the rule clearly.
+- Always mention specific numbers, thresholds, and conditions exactly as written.
+- If the answer spans multiple rules, connect them clearly.
+- If the rules don't fully answer the question, say exactly what is and isn't covered.
+- Never guess at thresholds, deadlines, or eligibility conditions.
+- End high-severity answers with: "Please verify this with your academic advisor."
+"""
 
 load_dotenv()
 
@@ -77,7 +88,7 @@ def call_llm(question, docs, metas):
         contents=user_message,
         config=types.GenerateContentConfig(
             system_instruction=SYSTEM_PROMPT,
-            max_output_tokens=512,
+            max_output_tokens=2048,
         )
     )
 
