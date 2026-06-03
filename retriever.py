@@ -4,6 +4,31 @@ from rank_bm25 import BM25Okapi
 import numpy as np
 
 
+CATEGORY_KEYWORDS = {
+    "grading": [
+        "grade", "gpa", "cgpa", "score", "mark", "HD", "distinction",
+        "fail", "pass", "A+", "B+", "C+", "letter", "point", "WAM",
+        "incomplete", "withdrawal", "audit"
+    ],
+    "academic-standing": [
+        "probation", "dismissal", "exclusion", "standing", "warning",
+        "withdraw", "expelled", "cgpa below", "minimum cgpa", "academic failure"
+    ],
+    "assessments": [
+        "retake", "repeat", "resit", "failed course", "F grade",
+        "supplementary", "make up", "makeup", "exam", "resubmit",
+        "attempt", "redo"
+    ],
+    "admin": [
+        "change department", "transfer", "switch program", "leave",
+        "semester drop", "defer", "readmission", "dropout", "late registration"
+    ],
+    "attendance": [
+        "attendance", "absent", "miss class", "lab session", "studio"
+    ]
+}
+
+
 def load_resources(persist_dir="./chroma_db"):
     model = SentenceTransformer("all-MiniLM-L6-v2")
     client = chromadb.PersistentClient(path=persist_dir)
@@ -81,7 +106,19 @@ def reciprocal_rank_fusion(semantic_docs, semantic_meta, bm25_docs, bm25_meta, t
 
 
 def detect_category(question):
-    return None
+    question_lower = question.lower()
+    
+    hit_counts = {}
+
+    for category, keywords in CATEGORY_KEYWORDS.items():
+        hits = sum(1 for kw in keywords if kw.lower() in question_lower)
+        if hits > 0:
+            hit_counts[category] = hits
+
+    if not hit_counts:
+        return None 
+
+    return max(hit_counts, key=hit_counts.get)
 
 
 def retrieve(question, model, collection, bm25, all_docs, all_metadatas, top_k=10):
